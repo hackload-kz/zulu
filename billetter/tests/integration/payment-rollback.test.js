@@ -6,7 +6,7 @@ import {
   afterAll,
   beforeEach,
 } from 'vitest';
-import { fastify } from '../src/app.js';
+import { fastify } from '../../src/app.js';
 
 describe('Test Scenario 4: Unsuccessful Payments and Rollbacks', () => {
   let app;

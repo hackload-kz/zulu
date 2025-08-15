@@ -6,7 +6,7 @@ import {
   afterAll,
   beforeEach,
 } from 'vitest';
-import { fastify } from '../src/app.js';
+import { fastify } from '../../src/app.js';
 
 describe('Validation and Error Handling Tests', () => {
   let app;

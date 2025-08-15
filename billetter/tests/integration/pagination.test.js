@@ -6,7 +6,7 @@ import {
   afterAll,
   beforeEach,
 } from 'vitest';
-import { fastify } from '../src/app.js';
+import { fastify } from '../../src/app.js';
 
 describe('Test Scenario 5: Pagination in Large Seat Lists', () => {
   let app;

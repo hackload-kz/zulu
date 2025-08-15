@@ -6,7 +6,7 @@ describe('Test Setup Verification', () => {
   });
 
   test('ES modules are supported', async () => {
-    const { fastify } = await import('../src/app.js');
+    const { fastify } = await import('../../src/app.js');
     expect(fastify).toBeDefined();
   });
 });
