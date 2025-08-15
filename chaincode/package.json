@@ -1,0 +1,39 @@
+{
+  "name": "zulu-chaincode",
+  "version": "1.0.0",
+  "description": "Hyperledger Fabric Node.js Smart Contract Development Project",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "keywords": [
+    "hyperledger",
+    "fabric",
+    "blockchain",
+    "smart-contracts",
+    "chaincode",
+    "javascript"
+  ],
+  "author": "",
+  "license": "Apache-2.0",
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-node": "^11.1.0",
+    "prettier": "^3.2.5"
+  },
+  "dependencies": {},
+  "repository": {
+    "type": "git",
+    "url": ""
+  }
+}
