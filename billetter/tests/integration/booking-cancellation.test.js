@@ -108,7 +108,7 @@ describe('Test Scenario 2: Cancel Booking at Various Stages', () => {
       url: `/api/seats?event_id=${eventId}&page=1&pageSize=3`,
     });
     const seats = JSON.parse(seatsResponse.payload);
-    const availableSeats = seats.filter((seat) => !seat.reserved).slice(0, 2);
+    const availableSeats = seats.filter((seat) => seat.status === 'FREE').slice(0, 2);
 
     // Select multiple seats
     for (const seat of availableSeats) {
@@ -131,7 +131,7 @@ describe('Test Scenario 2: Cancel Booking at Various Stages', () => {
     const reservedSeats = JSON.parse(reservedSeatsResponse.payload);
     for (const selectedSeat of availableSeats) {
       const seat = reservedSeats.find((s) => s.id === selectedSeat.id);
-      expect(seat.reserved).toBe(true);
+      expect(seat.status).toBe('RESERVED');
     }
 
     // Cancel booking
@@ -162,7 +162,7 @@ describe('Test Scenario 2: Cancel Booking at Various Stages', () => {
     const finalSeats = JSON.parse(finalSeatsResponse.payload);
     for (const selectedSeat of availableSeats) {
       const seat = finalSeats.find((s) => s.id === selectedSeat.id);
-      expect(seat.reserved).toBe(false);
+      expect(seat.status).toBe('FREE');
     }
   });
 
@@ -194,7 +194,7 @@ describe('Test Scenario 2: Cancel Booking at Various Stages', () => {
       url: `/api/seats?event_id=${eventId}&page=1&pageSize=2`,
     });
     const seats = JSON.parse(seatsResponse.payload);
-    const availableSeats = seats.filter((seat) => !seat.reserved);
+    const availableSeats = seats.filter((seat) => seat.status === 'FREE');
 
     for (const seat of availableSeats) {
       await app.inject({
@@ -215,7 +215,7 @@ describe('Test Scenario 2: Cancel Booking at Various Stages', () => {
         booking_id: bookingId,
       },
     });
-    expect(paymentResponse.statusCode).toBe(200);
+    expect(paymentResponse.statusCode).toBe(302);
 
     // Verify booking is in payment_initiated status
     const paymentBookingsResponse = await app.inject({
@@ -254,7 +254,7 @@ describe('Test Scenario 2: Cancel Booking at Various Stages', () => {
     const finalSeats = JSON.parse(finalSeatsResponse.payload);
     for (const selectedSeat of availableSeats) {
       const seat = finalSeats.find((s) => s.id === selectedSeat.id);
-      expect(seat.reserved).toBe(false);
+      expect(seat.status).toBe('FREE');
     }
   });
 

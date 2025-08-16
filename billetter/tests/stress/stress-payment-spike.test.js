@@ -312,7 +312,7 @@ describe('Stress Test: Payment Spike Scenarios', () => {
       url: `/api/seats?event_id=${eventId}&page=1&pageSize=20`,
     });
     const finalSeats = JSON.parse(finalSeatsResponse.payload);
-    const reservedSeats = finalSeats.filter((seat) => seat.reserved);
+    const reservedSeats = finalSeats.filter((seat) => seat.status === 'RESERVED');
 
     console.log(`Reserved seats after rollback: ${reservedSeats.length}`);
     expect(reservedSeats.length).toBe(0); // All seats should be released

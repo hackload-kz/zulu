@@ -166,14 +166,16 @@ describe('Test Scenario 5: Pagination in Large Seat Lists', () => {
       expect(page1Seats[0]).toHaveProperty('id');
       expect(page1Seats[0]).toHaveProperty('row');
       expect(page1Seats[0]).toHaveProperty('number');
-      expect(page1Seats[0]).toHaveProperty('reserved');
+      expect(page1Seats[0]).toHaveProperty('status');
+      expect(page1Seats[0]).toHaveProperty('price');
     }
 
     if (page2Seats.length > 0) {
       expect(page2Seats[0]).toHaveProperty('id');
       expect(page2Seats[0]).toHaveProperty('row');
       expect(page2Seats[0]).toHaveProperty('number');
-      expect(page2Seats[0]).toHaveProperty('reserved');
+      expect(page2Seats[0]).toHaveProperty('status');
+      expect(page2Seats[0]).toHaveProperty('price');
     }
 
     // Test retrieving same page twice for consistency
@@ -218,11 +220,14 @@ describe('Test Scenario 5: Pagination in Large Seat Lists', () => {
         expect(seat).toHaveProperty('id');
         expect(seat).toHaveProperty('row');
         expect(seat).toHaveProperty('number');
-        expect(seat).toHaveProperty('reserved');
+        expect(seat).toHaveProperty('status');
+        expect(seat).toHaveProperty('price');
         expect(typeof seat.id).toBe('number');
         expect(typeof seat.row).toBe('number');
         expect(typeof seat.number).toBe('number');
-        expect(typeof seat.reserved).toBe('boolean');
+        expect(typeof seat.status).toBe('string');
+        expect(['FREE', 'RESERVED', 'SOLD']).toContain(seat.status);
+        expect(typeof seat.price).toBe('string');
       });
     }
   });
@@ -343,7 +348,9 @@ describe('Test Scenario 5: Pagination in Large Seat Lists', () => {
       url: `/api/seats?event_id=${eventId}&page=1&pageSize=5`,
     });
     const page1Seats = JSON.parse(page1Response.payload);
-    const seatsToReserve = page1Seats.filter((s) => !s.reserved).slice(0, 2);
+    const seatsToReserve = page1Seats
+      .filter((s) => !s.status === 'RESERVED')
+      .slice(0, 2);
 
     for (const seat of seatsToReserve) {
       await app.inject({
@@ -368,7 +375,7 @@ describe('Test Scenario 5: Pagination in Large Seat Lists', () => {
       const updatedSeat = updatedPage1Seats.find(
         (s) => s.id === reservedSeat.id
       );
-      expect(updatedSeat.reserved).toBe(true);
+      expect(updatedSeat.status).toBe('RESERVED');
     }
 
     // Get second page to ensure reservations don't affect other pages

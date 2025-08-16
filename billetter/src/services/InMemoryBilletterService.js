@@ -1,8 +1,8 @@
-import { BilletterService } from './BilletterService.js';
-
-class InMemoryBilletterService extends BilletterService {
+/**
+ * @implements {BilletterService}
+ */
+class InMemoryBilletterService {
   constructor() {
-    super();
     this.events = new Map();
     this.bookings = new Map();
     this.seats = new Map();
@@ -42,7 +42,8 @@ class InMemoryBilletterService extends BilletterService {
           id: seatId,
           row,
           number,
-          reserved: false,
+          status: 'FREE',
+          price: '10.00',
           event_id: id,
         };
         this.seats.set(seatId, seat);
@@ -54,11 +55,39 @@ class InMemoryBilletterService extends BilletterService {
     return { id };
   }
 
-  async getEvents() {
-    return Array.from(this.events.values()).map(({ id, title }) => ({
-      id,
-      title,
-    }));
+  async getEvents(query = {}) {
+    let events = Array.from(this.events.values()).map(
+      ({ id, title, external }) => ({
+        id,
+        title,
+        external,
+      })
+    );
+
+    // Apply query filter
+    if (query.query) {
+      const searchTerm = query.query.toLowerCase();
+      events = events.filter((event) =>
+        event.title.toLowerCase().includes(searchTerm)
+      );
+    }
+
+    // Apply date filter (not implemented for in-memory service as we don't have dates)
+    if (query.date) {
+      // In a real implementation, you would filter by event date
+      // For the in-memory service, we'll just ignore this filter
+    }
+
+    // Apply pagination
+    if (query.page || query.pageSize) {
+      const page = query.page || 1;
+      const pageSize = query.pageSize || 10;
+      const startIndex = (page - 1) * pageSize;
+      const endIndex = startIndex + pageSize;
+      events = events.slice(startIndex, endIndex);
+    }
+
+    return events;
   }
 
   async createBooking(data) {
@@ -112,7 +141,8 @@ class InMemoryBilletterService extends BilletterService {
         id: seat.id,
         row: seat.row,
         number: seat.number,
-        reserved: seat.reserved,
+        status: seat.status,
+        price: seat.price,
       };
     });
   }
@@ -140,11 +170,11 @@ class InMemoryBilletterService extends BilletterService {
       throw new Error('Seat does not belong to the booking event');
     }
 
-    if (seat.reserved) {
+    if (seat.status !== 'FREE') {
       throw new Error('Failed to add seat to booking');
     }
 
-    seat.reserved = true;
+    seat.status = 'RESERVED';
     this.seats.set(seat_id, seat);
     this.bookingSeats.get(booking_id).add(seat_id);
 
@@ -166,7 +196,7 @@ class InMemoryBilletterService extends BilletterService {
     }
 
     const seat = this.seats.get(seat_id);
-    if (!seat.reserved) {
+    if (seat.status !== 'RESERVED') {
       throw new Error('Failed to release seat');
     }
 
@@ -176,12 +206,12 @@ class InMemoryBilletterService extends BilletterService {
 
   releaseSeatInternal(seat_id) {
     const seat = this.seats.get(seat_id);
-    if (seat && seat.reserved) {
-      seat.reserved = false;
+    if (seat && seat.status === 'RESERVED') {
+      seat.status = 'FREE';
       this.seats.set(seat_id, seat);
 
       // Remove from booking seats
-      for (const [bookingId, seatSet] of this.bookingSeats.entries()) {
+      for (const seatSet of this.bookingSeats.values()) {
         if (seatSet.has(seat_id)) {
           seatSet.delete(seat_id);
           break;
@@ -220,7 +250,8 @@ class InMemoryBilletterService extends BilletterService {
       }
     }
 
-    return 'Booking is awaiting payment confirmation';
+    // Return a payment URL (simulated redirect)
+    return `http://localhost:3000/payment?booking_id=${booking_id}`;
   }
 
   async cancelBooking(data) {
@@ -263,6 +294,16 @@ class InMemoryBilletterService extends BilletterService {
 
     booking.status = 'confirmed';
     this.bookings.set(booking_id, booking);
+
+    // Mark all seats as SOLD
+    const bookingSeatsSet = this.bookingSeats.get(booking_id) || new Set();
+    for (const seat_id of bookingSeatsSet) {
+      const seat = this.seats.get(seat_id);
+      if (seat) {
+        seat.status = 'SOLD';
+        this.seats.set(seat_id, seat);
+      }
+    }
 
     return 'OK';
   }

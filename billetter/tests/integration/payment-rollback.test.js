@@ -55,7 +55,9 @@ describe('Test Scenario 4: Unsuccessful Payments and Rollbacks', () => {
       url: `/api/seats?event_id=${eventId}&page=1&pageSize=5`,
     });
     const seats = JSON.parse(seatsResponse.payload);
-    const availableSeats = seats.filter((seat) => !seat.reserved).slice(0, 3);
+    const availableSeats = seats
+      .filter((seat) => seat.status === 'FREE')
+      .slice(0, 3);
 
     for (const seat of availableSeats) {
       const selectResponse = await app.inject({
@@ -77,7 +79,7 @@ describe('Test Scenario 4: Unsuccessful Payments and Rollbacks', () => {
     const reservedSeats = JSON.parse(reservedSeatsResponse.payload);
     for (const selectedSeat of availableSeats) {
       const seat = reservedSeats.find((s) => s.id === selectedSeat.id);
-      expect(seat.reserved).toBe(true);
+      expect(seat.status).toBe('RESERVED');
     }
 
     // Initiate payment
@@ -88,7 +90,7 @@ describe('Test Scenario 4: Unsuccessful Payments and Rollbacks', () => {
         booking_id: bookingId,
       },
     });
-    expect(paymentResponse.statusCode).toBe(200);
+    expect(paymentResponse.statusCode).toBe(302);
 
     // Verify booking is in payment_initiated status
     const paymentBookingsResponse = await app.inject({
@@ -124,7 +126,7 @@ describe('Test Scenario 4: Unsuccessful Payments and Rollbacks', () => {
     const releasedSeats = JSON.parse(releasedSeatsResponse.payload);
     for (const selectedSeat of availableSeats) {
       const seat = releasedSeats.find((s) => s.id === selectedSeat.id);
-      expect(seat.reserved).toBe(false);
+      expect(seat.status).toBe('FREE');
     }
   });
 
@@ -205,7 +207,7 @@ describe('Test Scenario 4: Unsuccessful Payments and Rollbacks', () => {
     });
     const finalSeats = JSON.parse(finalSeatsResponse.payload);
     const finalSeat = finalSeats.find((s) => s.id === seat.id);
-    expect(finalSeat.reserved).toBe(false);
+    expect(finalSeat.status).toBe('FREE');
   });
 
   test('Failed payment allows seats to be selected by other bookings', async () => {
@@ -296,7 +298,7 @@ describe('Test Scenario 4: Unsuccessful Payments and Rollbacks', () => {
     const finalSeats = JSON.parse(finalSeatsResponse.payload);
     for (const targetSeat of targetSeats) {
       const seat = finalSeats.find((s) => s.id === targetSeat.id);
-      expect(seat.reserved).toBe(true);
+      expect(seat.status).toBe('RESERVED');
     }
   });
 
@@ -386,7 +388,7 @@ describe('Test Scenario 4: Unsuccessful Payments and Rollbacks', () => {
     });
     const finalSeats = JSON.parse(finalSeatsResponse.payload);
     const finalSeat = finalSeats.find((s) => s.id === seat.id);
-    expect(finalSeat.reserved).toBe(true);
+    expect(finalSeat.status).toBe('SOLD');
   });
 
   test('Multiple rapid payment failure attempts', async () => {
@@ -472,7 +474,7 @@ describe('Test Scenario 4: Unsuccessful Payments and Rollbacks', () => {
     const finalSeats = JSON.parse(finalSeatsResponse.payload);
     for (const selectedSeat of selectedSeats) {
       const seat = finalSeats.find((s) => s.id === selectedSeat.id);
-      expect(seat.reserved).toBe(false);
+      expect(seat.status).toBe('FREE');
     }
   });
 
@@ -570,9 +572,9 @@ describe('Test Scenario 4: Unsuccessful Payments and Rollbacks', () => {
     const finalSeat = finalSeats.find((s) => s.id === seat.id);
 
     if (finalBooking.status === 'confirmed') {
-      expect(finalSeat.reserved).toBe(true);
+      expect(finalSeat.status).toBe('SOLD');
     } else {
-      expect(finalSeat.reserved).toBe(false);
+      expect(finalSeat.status).toBe('FREE');
     }
   });
 });

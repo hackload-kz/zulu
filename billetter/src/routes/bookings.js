@@ -62,8 +62,8 @@ async function bookingsRoutes(fastify, options) {
     { schema: initiatePaymentSchema },
     async (request, reply) => {
       try {
-        const result = await billetterService.initiatePayment(request.body);
-        reply.send(JSON.stringify(result));
+        const paymentUrl = await billetterService.initiatePayment(request.body);
+        reply.code(302).header('Location', paymentUrl).send();
       } catch (error) {
         if (error.message === 'Booking not found') {
           reply.code(404).send({ error: error.message });

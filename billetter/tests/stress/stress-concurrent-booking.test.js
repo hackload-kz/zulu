@@ -145,7 +145,7 @@ describe('Stress Test: Concurrent Seat Booking (10,000 Users)', () => {
       url: `/api/seats?event_id=${eventId}&page=1&pageSize=20`,
     });
     const finalSeats = JSON.parse(finalSeatsResponse.payload);
-    const reservedSeats = finalSeats.filter((seat) => seat.reserved);
+    const reservedSeats = finalSeats.filter((seat) => seat.status === 'RESERVED');
 
     // Reserved seats should not exceed successful operations
     expect(reservedSeats.length).toBeLessThanOrEqual(

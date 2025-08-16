@@ -61,7 +61,9 @@ describe('Test Scenario 1: Full Successful Booking Flow', () => {
     expect(seats.length).toBeGreaterThan(0);
 
     // Step 4: Select multiple seats
-    const availableSeats = seats.filter((seat) => !seat.reserved).slice(0, 3);
+    const availableSeats = seats
+      .filter((seat) => seat.status === 'FREE')
+      .slice(0, 3);
     expect(availableSeats.length).toBeGreaterThan(0);
 
     for (const seat of availableSeats) {
@@ -87,7 +89,7 @@ describe('Test Scenario 1: Full Successful Booking Flow', () => {
     const updatedSeats = JSON.parse(updatedSeatsResponse.payload);
     for (const selectedSeat of availableSeats) {
       const seat = updatedSeats.find((s) => s.id === selectedSeat.id);
-      expect(seat.reserved).toBe(true);
+      expect(seat.status).toBe('RESERVED');
     }
 
     // Step 6: Initiate payment
@@ -98,9 +100,9 @@ describe('Test Scenario 1: Full Successful Booking Flow', () => {
         booking_id: bookingId,
       },
     });
-    expect(paymentResponse.statusCode).toBe(200);
-    expect(paymentResponse.payload).toBe(
-      '"Booking is awaiting payment confirmation"'
+    expect(paymentResponse.statusCode).toBe(302);
+    expect(paymentResponse.headers.location).toContain(
+      `booking_id=${bookingId}`
     );
 
     // Step 7: Verify booking status is payment_initiated
@@ -138,7 +140,7 @@ describe('Test Scenario 1: Full Successful Booking Flow', () => {
     const finalSeats = JSON.parse(finalSeatsResponse.payload);
     for (const selectedSeat of availableSeats) {
       const seat = finalSeats.find((s) => s.id === selectedSeat.id);
-      expect(seat.reserved).toBe(true);
+      expect(seat.status).toBe('SOLD');
     }
   });
 

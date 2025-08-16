@@ -179,10 +179,8 @@ describe('Billetter API Tests', () => {
         },
       });
 
-      expect(response.statusCode).toBe(200);
-      expect(response.payload).toBe(
-        '"Booking is awaiting payment confirmation"'
-      );
+      expect(response.statusCode).toBe(302);
+      expect(response.headers.location).toContain(`booking_id=${bookingId}`);
     });
 
     test('should cancel booking', async () => {
@@ -314,7 +312,7 @@ describe('Billetter API Tests', () => {
         url: `/api/seats?event_id=${eventId}&page=1&pageSize=1`,
       });
       const seats = JSON.parse(seatsResponse.payload);
-      const availableSeat = seats.find((seat) => !seat.reserved);
+      const availableSeat = seats.find((seat) => seat.status === 'FREE');
 
       if (availableSeat) {
         const response = await app.inject({
@@ -348,7 +346,7 @@ describe('Billetter API Tests', () => {
         url: `/api/seats?event_id=${eventId}&page=1&pageSize=1`,
       });
       const seats = JSON.parse(seatsResponse.payload);
-      const availableSeat = seats.find((seat) => !seat.reserved);
+      const availableSeat = seats.find((seat) => seat.status === 'FREE');
 
       if (availableSeat) {
         // Select seat first

@@ -25,14 +25,30 @@ async function eventsRoutes(fastify, options) {
     }
   );
 
-  fastify.get('/api/events', async (request, reply) => {
-    try {
-      const events = await billetterService.getEvents();
-      reply.send(events);
-    } catch (error) {
-      reply.code(500).send({ error: error.message });
+  const getEventsSchema = {
+    querystring: {
+      type: 'object',
+      properties: {
+        query: { type: 'string' },
+        date: { type: 'string' },
+        page: { type: 'integer', minimum: 1 },
+        pageSize: { type: 'integer', minimum: 1, maximum: 100 },
+      },
+    },
+  };
+
+  fastify.get(
+    '/api/events',
+    { schema: getEventsSchema },
+    async (request, reply) => {
+      try {
+        const events = await billetterService.getEvents(request.query);
+        reply.send(events);
+      } catch (error) {
+        reply.code(500).send({ error: error.message });
+      }
     }
-  });
+  );
 }
 
 export default eventsRoutes;

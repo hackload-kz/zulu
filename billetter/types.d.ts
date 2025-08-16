@@ -1,12 +1,12 @@
 // TypeScript type definitions for Billetter API
 
-export interface Event {
+interface Event {
   id: number;
   title: string;
   external: boolean;
 }
 
-export interface Booking {
+interface Booking {
   id: number;
   event_id: number;
   status:
@@ -17,51 +17,59 @@ export interface Booking {
     | 'cancelled';
 }
 
-export interface Seat {
+interface Seat {
   id: number;
   row: number;
   number: number;
-  reserved: boolean;
+  status: 'FREE' | 'RESERVED' | 'SOLD';
+  price: string;
 }
 
-export interface CreateEventRequest {
+interface CreateEventRequest {
   title: string;
   external: boolean;
 }
 
-export interface CreateBookingRequest {
+interface CreateBookingRequest {
   event_id: number;
 }
 
-export interface SelectSeatRequest {
+interface SelectSeatRequest {
   booking_id: number;
   seat_id: number;
 }
 
-export interface ReleaseSeatRequest {
+interface ReleaseSeatRequest {
   seat_id: number;
 }
 
-export interface InitiatePaymentRequest {
+interface InitiatePaymentRequest {
   booking_id: number;
 }
 
-export interface CancelBookingRequest {
+interface CancelBookingRequest {
   booking_id: number;
 }
 
-export interface SeatsQuery {
+interface SeatsQuery {
   event_id: number;
   page?: number;
   pageSize?: number;
 }
 
-export interface PaymentCallbackQuery {
+interface EventsQuery {
+  query?: string;
+  date?: string;
+  page?: number;
+  pageSize?: number;
+}
+
+interface PaymentCallbackQuery {
   orderId: number;
 }
 
 // EventProvider types
-export interface Order {
+interface Order {
   id: string;
   status: 'STARTED' | 'SUBMITTED' | 'CONFIRMED' | 'CANCELLED';
   started_at: number;
@@ -69,33 +77,33 @@ export interface Order {
   places_count: number;
 }
 
-export interface Place {
+interface Place {
   id: string;
   row: number;
   seat: number;
   is_free: boolean;
 }
 
-export interface PaginationParams {
+interface PaginationParams {
   page?: number;
   pageSize?: number;
 }
 
-export interface EventProviderConfig {
+interface EventProviderConfig {
   baseURL: string;
 }
 
 // Service interfaces
-export abstract class BilletterService {
-  abstract createEvent(data: CreateEventRequest): Promise<{ id: number }>;
-  abstract getEvents(): Promise<Event[]>;
-  abstract createBooking(data: CreateBookingRequest): Promise<{ id: number }>;
-  abstract getBookings(): Promise<Booking[]>;
-  abstract getSeats(query: SeatsQuery): Promise<Seat[]>;
-  abstract selectSeat(data: SelectSeatRequest): Promise<string>;
-  abstract releaseSeat(data: ReleaseSeatRequest): Promise<string>;
-  abstract initiatePayment(data: InitiatePaymentRequest): Promise<string>;
-  abstract cancelBooking(data: CancelBookingRequest): Promise<string>;
-  abstract confirmPayment(orderId: number): Promise<string>;
-  abstract failPayment(orderId: number): Promise<string>;
+interface BilletterService {
+  createEvent(data: CreateEventRequest): Promise<{ id: number }>;
+  getEvents(query?: EventsQuery): Promise<Event[]>;
+  createBooking(data: CreateBookingRequest): Promise<{ id: number }>;
+  getBookings(): Promise<Booking[]>;
+  getSeats(query: SeatsQuery): Promise<Seat[]>;
+  selectSeat(data: SelectSeatRequest): Promise<string>;
+  releaseSeat(data: ReleaseSeatRequest): Promise<string>;
+  initiatePayment(data: InitiatePaymentRequest): Promise<string>;
+  cancelBooking(data: CancelBookingRequest): Promise<string>;
+  confirmPayment(orderId: number): Promise<string>;
+  failPayment(orderId: number): Promise<string>;
 }

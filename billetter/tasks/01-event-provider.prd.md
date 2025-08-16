@@ -18,7 +18,7 @@ The API wrapper will be implemented as a class named `EventProviderService`.
 
 #### 3.1. Configuration and Instantiation
 
-The class constructor must accept a configuration object to set a mandatory base URL for the API and any optional authentication credentials.
+The class constructor must accept a configuration object to set a mandatory base URL for the API.
 
 **Example:**
 
@@ -33,6 +33,7 @@ const apiClient = new EventProviderService({
 The wrapper will expose interfaces for the API's data structures.
 
 - **`Order`**
+
   ```typescript
   interface Order {
     id: string;
@@ -42,7 +43,9 @@ The wrapper will expose interfaces for the API's data structures.
     places_count: number;
   }
   ```
+
 - **`Place`**
+
   ```typescript
   interface Place {
     id: string;
@@ -51,7 +54,9 @@ The wrapper will expose interfaces for the API's data structures.
     is_free: boolean;
   }
   ```
+
 - **`PaginationParams`**
+
   ```typescript
   interface PaginationParams {
     page?: number;
@@ -65,10 +70,10 @@ The `EventProviderService` class will expose the following public methods, corre
 
 ##### 3.3.1. Order Management
 
-- **`startOrder(): Promise<{ order_id: string }>`**
+- **`startOrder(): Promise<string>`**
   - **Description:** Creates a new order.
   - **Endpoint:** `POST /partners/v1/orders`
-  - **Success Response:** Returns an object containing the new `order_id`.
+  - **Success Response:** Returns the new order ID.
 
 - **`getOrder(id: string): Promise<Order>`**
   - **Description:** Retrieves the details of a specific order by its ID.
@@ -118,8 +123,8 @@ The `EventProviderService` class will expose the following public methods, corre
 
 The wrapper must provide a robust error-handling mechanism.
 
-1.  **General API Error:** A generic `EventProviderError` class should be created to wrap all errors originating from the API. It should contain the original status code, error message, and any response body from the server.
-2.  **Network Errors:** Standard network errors (e.g., timeouts, DNS issues) should not be caught.
+1. **General API Error:** A generic `EventProviderError` class should be created to wrap all errors originating from the API. It should contain the original status code, error message, and any response body from the server.
+2. **Network Errors:** Standard network errors (e.g., timeouts, DNS issues) should not be caught.
 
 ### 4. Non-Functional Requirements
 

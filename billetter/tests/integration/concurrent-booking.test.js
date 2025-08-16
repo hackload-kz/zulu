@@ -64,7 +64,7 @@ describe('Test Scenario 3: Concurrent Seat Booking', () => {
       url: `/api/seats?event_id=${eventId}&page=1&pageSize=1`,
     });
     const seats = JSON.parse(seatsResponse.payload);
-    const targetSeat = seats.find((seat) => !seat.reserved);
+    const targetSeat = seats.find((seat) => seat.status === 'FREE');
     expect(targetSeat).toBeDefined();
 
     // Simulate concurrent requests by making both requests rapidly
@@ -108,7 +108,7 @@ describe('Test Scenario 3: Concurrent Seat Booking', () => {
     });
     const finalSeats = JSON.parse(finalSeatsResponse.payload);
     const finalSeat = finalSeats.find((s) => s.id === targetSeat.id);
-    expect(finalSeat.reserved).toBe(true);
+    expect(finalSeat.status).toBe('RESERVED');
   });
 
   test('Multiple clients compete for limited seats', async () => {
@@ -144,7 +144,7 @@ describe('Test Scenario 3: Concurrent Seat Booking', () => {
       url: `/api/seats?event_id=${eventId}&page=1&pageSize=3`,
     });
     const seats = JSON.parse(seatsResponse.payload);
-    const availableSeats = seats.filter((seat) => !seat.reserved);
+    const availableSeats = seats.filter((seat) => seat.status === 'FREE');
     expect(availableSeats.length).toBeGreaterThanOrEqual(3);
 
     // All bookings try to select the same limited set of seats
@@ -185,7 +185,9 @@ describe('Test Scenario 3: Concurrent Seat Booking', () => {
     const finalSeats = JSON.parse(finalSeatsResponse.payload);
 
     // Count reserved seats should equal successful selections
-    const reservedSeats = finalSeats.filter((seat) => seat.reserved);
+    const reservedSeats = finalSeats.filter(
+      (seat) => seat.status === 'RESERVED'
+    );
     expect(reservedSeats.length).toBe(successCount);
   });
 
@@ -275,7 +277,8 @@ describe('Test Scenario 3: Concurrent Seat Booking', () => {
     const finalSeat1 = finalSeats.find((s) => s.id === seat1.id);
 
     // Seat should be either reserved or not reserved, but state should be consistent
-    expect(typeof finalSeat1.reserved).toBe('boolean');
+    expect(typeof finalSeat1.status).toBe('string');
+    expect(['FREE', 'RESERVED', 'SOLD']).toContain(finalSeat1.status);
   });
 
   test('High concurrency stress test with multiple operations', async () => {
@@ -358,7 +361,9 @@ describe('Test Scenario 3: Concurrent Seat Booking', () => {
       url: `/api/seats?event_id=${eventId}&page=1&pageSize=5`,
     });
     const finalSeats = JSON.parse(finalSeatsResponse.payload);
-    const reservedCount = finalSeats.filter((seat) => seat.reserved).length;
+    const reservedCount = finalSeats.filter(
+      (seat) => seat.status === 'RESERVED'
+    ).length;
 
     // Reserved seats should equal successful selections
     expect(reservedCount).toBe(successCount);
