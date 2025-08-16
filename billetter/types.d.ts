@@ -9,7 +9,12 @@ export interface Event {
 export interface Booking {
   id: number;
   event_id: number;
-  status: 'booked' | 'seats_selected' | 'payment_initiated' | 'confirmed' | 'cancelled';
+  status:
+    | 'booked'
+    | 'seats_selected'
+    | 'payment_initiated'
+    | 'confirmed'
+    | 'cancelled';
 }
 
 export interface Seat {
@@ -53,6 +58,31 @@ export interface SeatsQuery {
 
 export interface PaymentCallbackQuery {
   orderId: number;
+}
+
+// EventProvider types
+export interface Order {
+  id: string;
+  status: 'STARTED' | 'SUBMITTED' | 'CONFIRMED' | 'CANCELLED';
+  started_at: number;
+  updated_at: number;
+  places_count: number;
+}
+
+export interface Place {
+  id: string;
+  row: number;
+  seat: number;
+  is_free: boolean;
+}
+
+export interface PaginationParams {
+  page?: number;
+  pageSize?: number;
+}
+
+export interface EventProviderConfig {
+  baseURL: string;
 }
 
 // Service interfaces
